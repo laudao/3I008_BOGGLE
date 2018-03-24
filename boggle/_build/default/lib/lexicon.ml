@@ -11,6 +11,8 @@ type t = {
   words : t M.t;
 }
 
+let iter_sur_mot = ref Iter.empty
+
 let empty =
   (* Cette valeur vous est donnée, vous n'avez pas besoin de l'écrire
      vous-même. *)
@@ -32,7 +34,8 @@ let rec is_empty { eow; words } =
   |(true,_)->false*)
 
 let add lexicon word =
-  let rec traverse n t =
+ iter_sur_mot :=(Iter.cons word (!iter_sur_mot));
+ let rec traverse n t =
     if n < String.length word then
       if M.mem word.[n] t.words then
         let new_d = M.remove word.[n] t.words 
@@ -45,13 +48,11 @@ let add lexicon word =
       {eow=true;words=t.words}
   in traverse 0 lexicon
 
-
 let rec to_iter { eow; words } =
-  failwith "Unimplemented" 
-  (*
-  match eow with
+  !iter_sur_mot
+  (*match eow with
   | false -> Iter.map (fun k i -> Iter.append (Iter.singleton k) (to_iter i)) (M.to_iter words)
-  | true -> M.singleton "k" *)
+  | true -> M.singleton "k"*)
   
 
 let letter_suffixes { eow; words } letter =
@@ -60,7 +61,7 @@ let letter_suffixes { eow; words } letter =
       {eow=false;words=t.words}
     else
       empty
-  in traverse 0   { eow; words }
+  in traverse 0  { eow; words }
 
 let rec filter_min_length len { eow; words } =
   let mots = (Iter.filter (fun x -> if String.length(x) > len then true else false)(to_iter { eow; words })) in
